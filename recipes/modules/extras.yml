@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+
+modules:
+
+  - type: copy
+    from: source-builds
+    src: /out/
+    dest: /
+
+  - type: script
+    scripts:
+      - millenium.sh # steam theming
+      - papirus-folders.sh # change default papirus folder theme
+      - pixora.sh # pixora icon theme (Hyprland session)
+      - netmuxd.sh # iPhone access over Wi-Fi
+      - upstream-binaries.sh # wayscriber, DeepFilterNet, Helium, JetBrainsMonoNL Nerd Font, Discord
+      - skel.sh # empty /etc/skel, zsh as default shell
+      - zsh-plugins.sh # bake the skel .zshrc's plugins into /usr/share/zsh/plugins
+      - nautilus-open-any-terminal.sh # Nautilus "Open in Terminal" -> kitty
+
+  - type: brew
+    nofile-limits: true # increase nofile limits
+    brew-analytics: false # disable telemetry
+    # dev tools: /usr/share/aeases-os/Brewfile, installed per user by `dev-setup`
+
+  - type: files
+    files:
+      - source: system
+        destination: / # copies files/system/* (* means everything inside it) into your image's root folder /
+
+  - type: gschema-overrides
+    include:
+      - zz1-aeases-os-gtk.gschema.override
+      - zz1-aeases-os-terminal.gschema.override
+      - zz1-aeases-os-blueman.gschema.override
+      - zz1-aeases-os-icons.gschema.override

@@ -1,0 +1,5 @@
+[org.gnome.desktop.interface:Hyprland]
+icon-theme='pixora'
+
+[org.gnome.desktop.interface:KDE]
+icon-theme='Papirus-Dark'

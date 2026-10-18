@@ -1,0 +1,2 @@
+[org.blueman.general]
+plugin-list=['!ShowConnected', '!StatusIcon']

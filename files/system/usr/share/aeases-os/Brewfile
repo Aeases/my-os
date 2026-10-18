@@ -1,0 +1,15 @@
+# installed per user by `dev-setup`
+
+# neovim and its plugins' tools
+brew "neovim"
+brew "tree-sitter-cli"
+brew "go"
+brew "ripgrep"
+brew "fd"
+
+# terminal tools
+brew "yazi"
+brew "lazygit"
+
+# latex for nvim
+brew "texlive"

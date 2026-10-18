@@ -1,0 +1,4 @@
+# Framework Laptop 13: remap the airplane-mode key (F10) to Tab.
+# CUS I FRICKING HATE CLICKING F10 AND IT DISCONNECTS EVERYYYYTHING :D
+evdev:input:b0018v32ACp0006*
+ KEYBOARD_KEY_100c6=tab

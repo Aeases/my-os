@@ -1,0 +1,10 @@
+[Unit]
+Description=Add administrators to the keyd and libvirt groups
+After=systemd-sysusers.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/wheel-groups
+
+[Install]
+WantedBy=multi-user.target

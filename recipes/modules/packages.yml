@@ -1,0 +1,153 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+
+  - type: dnf
+    repos:
+      nonfree: negativo17
+    install:
+      packages:
+        - greetd # greeter
+        - tuigreet # greeter after logging out
+        - SwayNotificationCenter
+        - flameshot
+        - grim
+        - slurp
+        - wl-clipboard # wl-copy/wl-paste
+        - brightnessctl
+        - playerctl
+        - switcheroo-control # switcherooctl, used by hypr/no-egpu
+        - bolt # Thunderbolt authorization
+        - v4l-utils # v4l2 loopback cli
+        - jq
+        - kde-connect
+        - fcitx5
+        - fcitx5-mozc
+        - fcitx5-chinese-addons
+        - fcitx5-configtool
+        - blueman
+        - network-manager-applet
+        - NetworkManager-openconnect
+        - NetworkManager-openconnect-gnome
+        - NetworkManager-openvpn
+        - NetworkManager-openvpn-gnome
+        - python3-gobject
+        - python3-pillow
+        - python3-platformdirs
+        - python3-imageio
+        - gtk-layer-shell
+        - libappindicator-gtk3
+        - python3-cairo
+        - python3-pulsectl-asyncio
+        - python3-pyxdg
+        - python3-requests
+        - python3-setuptools
+        - python3-websocket-client
+        - python3-xlib
+        - libqalculate # required for noctalia
+        - libical
+        - tomlplusplus
+        - md4c
+        - jemalloc
+        - tailscale # accessing friends
+        - adw-gtk3-theme # GTK theme
+        - open-sans-fonts
+        - papirus-icon-theme # papirus icons
+        - gtk-update-icon-cache # pixora.sh
+        - imv # minimal image viewer
+        - fastfetch # kinda better than neofetch ngl
+        - mpv
+        - loupe # not minimal image viewer
+        - gnome-text-editor # default for plain text
+        - gnome-disk-utility # GNOME Disks (not on Flathub)
+        - fprintd # fingerprint reader
+        - fprintd-pam # pam_fprintd.so, used only by /etc/pam.d/polkit-1
+        - gnome-keyring 
+        - tuned-ppd 
+        - virt-manager # VMs
+        - libvirt # needed for VMs
+        - qemu-kvm
+        - gvfs-afc # GVFS backends for Nautilus
+        - gvfs-fuse
+        - gvfs-goa
+        - gvfs-gphoto2
+        - gvfs-mtp
+        - gvfs-nfs
+        - gvfs-smb
+        - xdg-user-dirs # default folders
+        - steam
+        - usbmuxd # iPhone USB access
+        - ifuse # mount iPhone storage (USB, or Wi-Fi via netmuxd)
+        - libimobiledevice-utils # idevice_id etc., used by the dotfiles' iphone-mount
+        - git 
+        - git-crypt
+        - stow # dotfiles symlinks
+        - zsh # default shell for new users
+        - zoxide # smart cd
+        - zsh-autosuggestions 
+        - nautilus # file manager
+        - nautilus-python # for nautilus-open-any-terminal.sh and Open in Code
+        - kitty # terminal (Nautilus' "Open in Terminal" too)
+        - xdg-terminal-exec # make terminal programs open in a default terminal
+        - eza # better ls
+        - bat # better cat
+        - zathura # PDF viewer
+        - zathura-pdf-mupdf
+        - perl-Image-ExifTool # yazi previews
+        - gcc 
+        - make
+      exclude:
+        - alacritty
+        - fuzzel
+        - swaylock
+        - kio-extras-kf5 # unused KF5/Qt5 stack
+    remove:
+      packages:
+        - firefox
+        - firefox-langpacks
+
+  # only install the file picker, not the whole DE
+  - type: dnf
+    install:
+      install-weak-deps: false
+      packages:
+        - xdg-desktop-portal-gnome
+
+  # kde
+  - type: dnf
+    install:
+      packages:
+        - plasma-integration 
+        - kvantum 
+        - plasma-desktop
+        - kscreen
+        - xdg-desktop-portal-kde
+        - breeze-icon-theme # pixora and Papirus fall back
+        - kde-gtk-config # GTK apps follow the Plasma theme
+        - plasma-pa # volume applet and volume keys
+        - plasma-nm # wifi settings
+        - bluedevil # bluetooth settings
+        - plasma-systemmonitor
+        - plasma-disks
+        - plasma-thunderbolt
+        - plasma-print-manager
+        - kdeplasma-addons
+        - kinfocenter
+        - flatpak-kcm # per-app Flatpak permissions in System Settings
+        - plasma-discover # Flatpaks, and image updates through rpm-ostree
+        - plasma-discover-flatpak
+        - plasma-discover-rpm-ostree 
+        - dolphin
+        - konsole
+        - kate
+        - ark
+        - gwenview
+        - okular
+        - spectacle
+      exclude:
+        - sddm # greetd is the display manager
+        - plasma-discover-packagekit # can't install RPMs on an image
+        - plasma-discover-offline-updates
+        - plasma-discover-snap
+        - PackageKit
+        - pam-kwallet
+        - kio-extras-kf5 # unused KF5/Qt5 stack

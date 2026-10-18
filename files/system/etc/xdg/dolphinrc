@@ -1,0 +1,21 @@
+[DetailsMode]
+ExpandableFolders=false
+HighlightEntireRow=true
+IconSize=16
+PreviewSize=16
+
+[General]
+EditableUrl=true
+ShowFullPath=true
+ShowZoomSlider=false
+
+[KFileDialog Settings]
+Places Icons Auto-resize=false
+Places Icons Static Size=16
+
+[MainWindow][Toolbar mainToolBar]
+IconSize=16
+ToolButtonStyle=IconOnly
+
+[PlacesPanel]
+IconSize=16

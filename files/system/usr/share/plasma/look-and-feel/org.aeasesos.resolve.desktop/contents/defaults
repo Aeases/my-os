@@ -1,0 +1,8 @@
+[kdeglobals][KDE]
+widgetStyle=kvantum
+
+[kdeglobals][General]
+ColorScheme=Resolve
+
+[kdeglobals][Icons]
+Theme=Papirus-Dark

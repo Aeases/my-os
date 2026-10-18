@@ -1,0 +1,16 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "aeases-os"
+            }
+        ],
+        "Description": "DaVinci Resolve look: Kvantum Resolve widgets and colours, Papirus-Dark icons",
+        "Id": "org.aeasesos.resolve.desktop",
+        "License": "Apache-2.0",
+        "Name": "Resolve",
+        "Version": "1.0"
+    },
+    "X-Plasma-APIVersion": "2"
+}

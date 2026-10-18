@@ -1,0 +1,43 @@
+#!/bin/sh
+set -eu
+
+conf=/etc/greetd/config.toml
+out=/etc/greetd/config-autologin.toml
+
+if grep -q '^\[initial_session\]' "$conf"; then
+  cp "$conf" "$out.tmp"
+  mv "$out.tmp" "$out"
+  exit 0
+fi
+
+user=""
+if [ -r /etc/greetd/autologin-user ]; then
+  user=$(head -n 1 /etc/greetd/autologin-user | tr -d '[:space:]')
+else
+  for u in $(getent group wheel | cut -d: -f4 | tr ',' ' '); do
+    uid=$(id -u "$u" 2>/dev/null) || continue
+    [ "$uid" -ge 1000 ] || continue
+    if [ -z "$user" ] || [ "$uid" -lt "$(id -u "$user")" ]; then
+      user=$u
+    fi
+  done
+fi
+
+command="uwsm start -e -D Hyprland hyprland.desktop"
+session=$(head -n 1 "/var/lib/greetd/tuigreet-lastsession-path-$user" 2>/dev/null) || true
+case "$session" in
+  */hyprland.desktop) ;;
+  /usr/share/wayland-sessions/*.desktop)
+    exec_line=$(sed -n 's/^Exec=//p' "$session" 2>/dev/null | head -n 1 \
+      | sed -e 's/ *%[a-zA-Z]//g' -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+    [ -n "$exec_line" ] && command=$exec_line
+    ;;
+esac
+
+{
+  cat "$conf"
+  if [ -n "$user" ] && [ "$user" != none ] && id "$user" >/dev/null 2>&1; then
+    printf '\n[initial_session]\ncommand = "%s"\nuser = "%s"\n' "$command" "$user"
+  fi
+} > "$out.tmp"
+mv "$out.tmp" "$out"

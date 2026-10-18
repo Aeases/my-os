@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
+        - sdegler/hyprland
+    install:
+      packages:
+        - hyprland
+        - hypridle
+        - hyprpicker
+        - xdg-desktop-portal-hyprland
+        - uwsm
+        - waybar
+        - nwg-look
+        - python3-imageio-ffmpeg # waypaper deps not in Fedora
+        - python3-screeninfo
+
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
+        - quadratech188/vicinae
+    install:
+      packages:
+        - vicinae
+      exclude:
+        - nodejs24-docs # ~85 MB of node extras
+        - nodejs24-full-i18n
+
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - vscode.repo # files/dnf/vscode.repo
+    install:
+      packages:
+        - code

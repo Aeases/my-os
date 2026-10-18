@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+
+  - type: script
+    scripts:
+      - adjust-packaged-files.sh
+
+  - type: systemd
+    system:
+      enabled:
+        - greetd.service # display-manager.service
+        - keyd.service # config in /etc/keyd/default.conf
+        - wheel-groups.service # admins join the keyd and libvirt groups
+        - virtqemud.socket
+        - virtqemud-ro.socket
+        - virtqemud-admin.socket
+        - virtnetworkd.socket
+        - virtnetworkd-ro.socket
+        - virtnetworkd-admin.socket
+        - virtstoraged.socket
+        - virtstoraged-ro.socket
+        - virtstoraged-admin.socket
+        - virtnodedevd.socket
+        - virtnodedevd-ro.socket
+        - virtnodedevd-admin.socket
+        - virtsecretd.socket
+        - virtsecretd-ro.socket
+        - virtsecretd-admin.socket
+        - virtinterfaced.socket
+        - virtinterfaced-ro.socket
+        - virtinterfaced-admin.socket
+        - virtnwfilterd.socket
+        - virtnwfilterd-ro.socket
+        - virtnwfilterd-admin.socket
+      disabled:
+        - libvirtd.service
+        - libvirtd.socket
+        - libvirtd-ro.socket
+        - libvirtd-admin.socket
+    user:
+      enabled:
+        - vicinae.service
+        - deepfilter-mic.service # mic noise suppression
+
+  - type: default-flatpaks
+    configurations:
+      - scope: system 
+        install:
+          - com.dec05eba.gpu_screen_recorder # asks for admin once per user on first launch (KMS capture, global hotkeys)
+          - org.gtk.Gtk3theme.adw-gtk3 # adw-gtk3 for GTK3 flatpaks (runtime extensions)
+          - org.gtk.Gtk3theme.adw-gtk3-dark
+          - org.localsend.localsend_app
+
+  - type: kargs
+    kargs:
+      - lockdown=integrity # explicit, not just the automatic Secure Boot lockdown
+      - sysctl.kernel.kexec_load_disabled=1 # no kexec, signed or not
+      - iommu.passthrough=0 # DMA translated, never identity-mapped (never amd_iommu=pt)
+      - intel_iommu=on # Fedora leaves the Intel IOMMU off; ignored on AMD

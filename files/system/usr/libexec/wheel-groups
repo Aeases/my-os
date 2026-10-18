@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+for group in keyd libvirt; do
+  if ! grep -q "^$group:" /etc/group; then
+    grep "^$group:" /usr/lib/group >> /etc/group || continue
+  fi
+  for user in $(getent group wheel | cut -d: -f4 | tr ',' ' '); do
+    id -nG "$user" | tr ' ' '\n' | grep -qx "$group" || usermod -aG "$group" "$user"
+  done
+done

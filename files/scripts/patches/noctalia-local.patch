@@ -1,0 +1,126 @@
+diff --git a/src/app/application_services.cpp b/src/app/application_services.cpp
+index 72afb60..1df195d 100644
+--- a/src/app/application_services.cpp
++++ b/src/app/application_services.cpp
+@@ -1385,7 +1385,7 @@ void Application::initSystemBusServices() {
+       m_bluetoothService.reset();
+     }
+ 
+-    if (m_bluetoothService != nullptr) {
++    if (false && m_bluetoothService != nullptr) {
+       try {
+         m_bluetoothAgent = std::make_unique<BluetoothAgent>(*m_systemBus);
+         m_bluetoothAgent->setRequestCallback([this,
+diff --git a/src/app/application_ui.cpp b/src/app/application_ui.cpp
+index 02edd5f..d97a2ad 100644
+--- a/src/app/application_ui.cpp
++++ b/src/app/application_ui.cpp
+@@ -379,7 +379,7 @@ void Application::initLockScreenAndSession() {
+     m_logindService->setSessionLockIntegrationEnabled(m_configService.isLockScreenEnabled());
+     m_logindService->setLockBeforeSuspendEnabled(m_configService.shouldLockBeforeSuspend());
+     m_logindService->setLockCallback([this]() {
+-      if (!m_configService.isLockScreenEnabled()) {
++      if (true || !m_configService.isLockScreenEnabled()) {
+         return;
+       }
+       if (!m_lockScreen.isActive()) {
+diff --git a/src/auth/fingerprint_authenticator.cpp b/src/auth/fingerprint_authenticator.cpp
+index d7320cb..bae42d9 100644
+--- a/src/auth/fingerprint_authenticator.cpp
++++ b/src/auth/fingerprint_authenticator.cpp
+@@ -249,9 +249,16 @@ void FingerprintAuthenticator::stopVerify() {
+   if (m_device == nullptr) {
+     return;
+   }
+   try {
+-    m_device->callMethod("VerifyStop").onInterface(kDeviceInterface);
+-    kLog.debug("fingerprint verification stopped");
++    m_device->callMethodAsync("VerifyStop")
++        .onInterface(kDeviceInterface)
++        .uponReplyInvoke([](std::optional<sdbus::Error> e) {
++          if (e.has_value()) {
++            kLog.debug("could not stop fingerprint verification: {}", e->what());
++          } else {
++            kLog.debug("fingerprint verification stopped");
++          }
++        });
+   } catch (const sdbus::Error& e) {
+     kLog.debug("could not stop fingerprint verification: {}", e.what());
+   }
+@@ -261,8 +268,14 @@ void FingerprintAuthenticator::releaseDevice() {
+   if (m_device == nullptr) {
+     return;
+   }
+   try {
+-    m_device->callMethod("Release").onInterface(kDeviceInterface);
++    m_device->callMethodAsync("Release").onInterface(kDeviceInterface).uponReplyInvoke(
++        [](std::optional<sdbus::Error> e) {
++          if (e.has_value()) {
++            kLog.debug("could not release fingerprint device: {}", e->what());
++          }
++        }
++    );
+     kLog.info("released fingerprint device");
+   } catch (const sdbus::Error& e) {
+     kLog.debug("could not release fingerprint device: {}", e.what());
+diff --git a/src/dbus/bluetooth/bluetooth_service.cpp b/src/dbus/bluetooth/bluetooth_service.cpp
+index 6e4e398..7d0f4ba 100644
+--- a/src/dbus/bluetooth/bluetooth_service.cpp
++++ b/src/dbus/bluetooth/bluetooth_service.cpp
+@@ -812,7 +812,7 @@ BluetoothStateChangeOrigin BluetoothService::consumePoweredChangeOrigin(bool pow
+ }
+ 
+ void BluetoothService::scheduleAutoReconnect() {
+-  if (!m_state.powered || m_state.rfkillHardBlocked) {
++  if (true || !m_state.powered || m_state.rfkillHardBlocked) {
+     return;
+   }
+   m_autoReconnectAttempt = 0;
+diff --git a/src/dbus/network/network_secret_agent.cpp b/src/dbus/network/network_secret_agent.cpp
+index 40eefd5..8167a8d 100644
+--- a/src/dbus/network/network_secret_agent.cpp
++++ b/src/dbus/network/network_secret_agent.cpp
+@@ -94,14 +94,8 @@ struct NetworkSecretAgent::Impl {
+       return;
+     }
+     if (pendingResult.has_value()) {
+-      kLog.debug("GetSecrets while another is pending -> NoSecrets");
+-      result.returnError(
+-          sdbus::Error{
+-              sdbus::Error::Name{"org.freedesktop.NetworkManager.SecretManager.NoSecrets"},
+-              "another secret request is already pending"
+-          }
+-      );
+-      return;
++      kLog.info("GetSecrets while another is pending -> superseding the old request");
++      cancelPending("superseded by a newer request");
+     }
+ 
+     SecretRequest request;
+diff --git a/src/shell/control_center/tabs/network_tab.cpp b/src/shell/control_center/tabs/network_tab.cpp
+index 91516f7..6387a7d 100644
+--- a/src/shell/control_center/tabs/network_tab.cpp
++++ b/src/shell/control_center/tabs/network_tab.cpp
+@@ -606,6 +606,9 @@ NetworkTab::NetworkTab(
+   if (m_secrets != nullptr) {
+     m_secrets->setRequestCallback([this](const NetworkSecretAgent::SecretRequest& request) {
+       showPasswordPrompt(request);
++      if (!PanelManager::instance().isOpenPanel("control-center")) {
++        PanelManager::instance().openPanel("control-center", PanelOpenRequest{.context = "network"});
++      }
+       PanelManager::instance().refresh();
+     });
+   }
+@@ -898,6 +901,12 @@ void NetworkTab::doUpdate(Renderer& renderer) {
+ }
+ 
+ void NetworkTab::onClose() {
++  if (m_hasPendingSecret) {
++    if (!m_pendingAccessPoint.has_value() && m_secrets != nullptr) {
++      m_secrets->cancelSecret();
++    }
++    clearPasswordPrompt();
++  }
+   m_rootLayout = nullptr;
+   m_currentCard = nullptr;
+   m_currentTitle = nullptr;

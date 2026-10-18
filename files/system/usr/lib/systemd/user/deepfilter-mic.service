@@ -1,0 +1,15 @@
+[Unit]
+Description=DeepFilterNet mic noise suppression (own PipeWire process)
+After=pipewire.service pipewire-session-manager.service
+BindsTo=pipewire.service
+StartLimitIntervalSec=0 # Always restart
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/pipewire -c deepfilter-mic.conf
+Restart=always
+RestartSec=1
+Slice=session.slice
+
+[Install]
+WantedBy=pipewire.service

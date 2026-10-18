@@ -1,0 +1,8 @@
+[Unit]
+Description=Write greetd's config with autologin for the account made at install
+After=systemd-sysusers.service
+Before=greetd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/greetd-autologin-config

@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+modules:
+
+  - type: script
+    snippets:
+      - dnf config-manager setopt '*-debug.enabled=0' '*-source.enabled=0'
+
+  - type: akmods
+    nvidia-driver: nvidia-open
+    install:
+      - v4l2loopback # virtual camera
+
+  - type: script
+    snippets:
+      - dnf -y remove nvidia-driver-cuda-libs.i686 libnvidia-fbc.i686

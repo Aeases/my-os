@@ -1,0 +1,145 @@
+diff --git a/crates/polkit-agent/src/main.rs b/crates/polkit-agent/src/main.rs
+index 9167193..0c79b86 100644
+--- a/crates/polkit-agent/src/main.rs
++++ b/crates/polkit-agent/src/main.rs
+@@ -52,7 +52,7 @@ async fn serve() -> Result<(), Box<dyn std::error::Error>> {
+ 
+ async fn authenticate(
+     agent: &mut Agent,
+-    _action_id: &str,
++    action_id: &str,
+     message: &str,
+     _icon_name: &str,
+     _details: HashMap<&str, &str>,
+@@ -79,6 +79,7 @@ async fn authenticate(
+             agent.warm.clone(),
+             session,
+             message.to_owned(),
++            action_id.to_owned(),
+             cancel,
+         ))
+         .await
+@@ -104,6 +105,7 @@ async fn converse(
+     warm: Arc<Mutex<Option<Child>>>,
+     session: PolkitAgentSession,
+     message: String,
++    action_id: String,
+     cancel: Arc<Notify>,
+ ) -> Option<bool> {
+     let mut child = take_warm(&warm)?;
+@@ -113,6 +115,7 @@ async fn converse(
+     let start = Update::Start {
+         title: "Authentication required".to_owned(),
+         message,
++        action_id,
+     };
+     let outcome = if send(&mut stdin, &start).await.is_ok() {
+         drive(session, &mut stdin, &mut lines, &cancel).await
+diff --git a/crates/theme/src/lib.rs b/crates/theme/src/lib.rs
+index 11e1631..9d2dbc6 100644
+--- a/crates/theme/src/lib.rs
++++ b/crates/theme/src/lib.rs
+@@ -151,20 +151,32 @@ impl Default for Theme {
+ }
+ 
+ static THEME: OnceLock<Theme> = OnceLock::new();
++static ACTION: OnceLock<String> = OnceLock::new();
+ 
+ pub fn theme() -> &'static Theme {
+     THEME.get_or_init(Theme::load)
+ }
+ 
++pub fn select_action(action_id: &str) {
++    if THEME.get().is_some() {
++        eprintln!("psst: theme already loaded, ignoring action theme for {action_id}");
++        return;
++    }
++    let _ = ACTION.set(action_id.to_owned());
++}
++
+ impl Theme {
+     fn load() -> Theme {
+         let mut theme = Theme::default();
+-        let Some(text) = config_path().and_then(|path| std::fs::read_to_string(path).ok()) else {
+-            return theme;
+-        };
+-        match KdlDocument::parse(&text) {
+-            Ok(doc) => read_theme(&doc, &mut theme, false),
+-            Err(error) => eprintln!("psst: ignoring invalid theme: {error}"),
++        let action = ACTION.get().and_then(|id| action_path(id));
++        for path in config_path().into_iter().chain(action) {
++            let Ok(text) = std::fs::read_to_string(&path) else {
++                continue;
++            };
++            match KdlDocument::parse(&text) {
++                Ok(doc) => read_theme(&doc, &mut theme, false),
++                Err(error) => eprintln!("psst: ignoring invalid theme {}: {error}", path.display()),
++            }
+         }
+         theme
+     }
+@@ -345,12 +357,25 @@ fn parse_font(name: &str) -> FontFamily {
+     }
+ }
+ 
+-fn config_path() -> Option<PathBuf> {
++fn config_dir() -> Option<PathBuf> {
+     let base = std::env::var_os("XDG_CONFIG_HOME")
+         .filter(|value| !value.is_empty())
+         .map(PathBuf::from)
+         .or_else(|| std::env::var_os("HOME").map(|home| PathBuf::from(home).join(".config")))?;
+-    Some(base.join("psst").join("theme.kdl"))
++    Some(base.join("psst"))
++}
++
++fn config_path() -> Option<PathBuf> {
++    Some(config_dir()?.join("theme.kdl"))
++}
++
++fn action_path(action_id: &str) -> Option<PathBuf> {
++    let valid = !action_id.is_empty()
++        && !action_id.starts_with('.')
++        && action_id
++            .chars()
++            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_'));
++    valid.then(|| config_dir().map(|dir| dir.join("actions").join(format!("{action_id}.kdl"))))?
+ }
+ 
+ fn parse_hex(text: &str) -> Option<Hsla> {
+diff --git a/crates/ui/src/conversation.rs b/crates/ui/src/conversation.rs
+index 7c7808e..4bc12ab 100644
+--- a/crates/ui/src/conversation.rs
++++ b/crates/ui/src/conversation.rs
+@@ -15,7 +15,12 @@ use crate::{arm_watchdog, layer_window, Cancel, Icons, Submit};
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+ #[serde(tag = "type", rename_all = "snake_case")]
+ pub enum Update {
+-    Start { title: String, message: String },
++    Start {
++        title: String,
++        message: String,
++        #[serde(default)]
++        action_id: String,
++    },
+     Info { text: String },
+     Error { text: String },
+     Prompt { echo_on: bool, label: String },
+@@ -82,7 +87,7 @@ impl Convo {
+ 
+     fn apply(&mut self, update: Update, cx: &mut Context<Self>) {
+         match update {
+-            Update::Start { title, message } => {
++            Update::Start { title, message, .. } => {
+                 self.title = title;
+                 self.body = message;
+             }
+@@ -232,6 +237,9 @@ pub fn run_conversation() {
+                 match rx.as_ref().unwrap().try_recv() {
+                     Ok(Some(first)) => {
+                         let rx = rx.take().unwrap();
++                        if let Update::Start { action_id, .. } = &first {
++                            theme::select_action(action_id);
++                        }
+                         let _ = cx.update(|cx| {
+                             arm_watchdog("polkit dialog");
+                             cx.open_window(layer_window(), |window, cx| {
