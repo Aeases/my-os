@@ -1,0 +1,14 @@
+[Unit]
+Description=PipeWire outputs for AirPlay speakers
+After=pipewire-pulse.service
+Wants=pipewire-pulse.service
+
+[Service]
+Type=simple
+ExecStart=/usr/lib/airplay-bridge/bin/python -m airplay_bridge.bridge
+Restart=always
+RestartSec=2
+Slice=session.slice
+
+[Install]
+WantedBy=default.target

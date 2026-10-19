@@ -13,7 +13,7 @@ stages:
     modules:
       - type: script
         scripts:
-          - build-from-source.sh # keyd, tofi, wl-clip-persist, patched psst, awww, waypaper, discover-overlay, patched noctalia -> /out
+          - build-from-source.sh # keyd, tofi, wl-clip-persist, patched psst, awww, waypaper, discover-overlay, airplay-bridge, patched noctalia -> /out
 
 modules:
   - from-file: modules/packages.yml

@@ -1,0 +1,16 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "aeases-os"
+            }
+        ],
+        "Description": "fix progress bar colouring",
+        "EnabledByDefault": true,
+        "Id": "resolve",
+        "License": "LGPL",
+        "Name": "Resolve",
+        "Version": "1.0"
+    },
+    "X-Plasma-API": "5.0"
+}

@@ -7,6 +7,7 @@ set -oue pipefail
 
 OUT=/out
 PATCHES="$(cd "$(dirname "$0")" && pwd)/patches"
+AIRPLAY_BRIDGE="$(cd "$(dirname "$0")" && pwd)/airplay-bridge"
 
 WORK=$(mktemp -d)
 cd "$WORK"
@@ -49,6 +50,15 @@ pip install --root-user-action=ignore --no-deps --require-hashes --root "$OUT" -
 
 echo "discover-overlay==0.7.9 --hash=sha256:d7815ec315b4a69449bb21abd735369caf545db690ddcfed4eeb520ef027f820" > discover.txt
 pip install --root-user-action=ignore --no-deps --require-hashes --root "$OUT" --prefix /usr -r discover.txt
+
+python3 -m venv --without-pip --system-site-packages /usr/lib/airplay-bridge
+pip --python /usr/lib/airplay-bridge/bin/python install --root-user-action=ignore --no-deps --require-hashes \
+        --no-cache-dir -r "$AIRPLAY_BRIDGE/requirements.txt"
+AIRPLAY_SITE=$(/usr/lib/airplay-bridge/bin/python -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
+cp -r "$AIRPLAY_BRIDGE/airplay_bridge" "$AIRPLAY_SITE/"
+/usr/lib/airplay-bridge/bin/python -m compileall -q "$AIRPLAY_SITE/airplay_bridge"
+mkdir -p "$OUT/usr/lib"
+cp -a /usr/lib/airplay-bridge "$OUT/usr/lib/"
 
 dnf -y install --setopt=install_weak_deps=False pam-devel stb_image_resize2-devel stb_image_write-devel \
         'pkgconfig(cairo)' 'pkgconfig(cairo-ft)' 'pkgconfig(egl)' 'pkgconfig(epoxy)' \

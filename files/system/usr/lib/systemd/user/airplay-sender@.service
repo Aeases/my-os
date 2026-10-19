@@ -1,0 +1,14 @@
+[Unit]
+Description=Stream the %i output to its AirPlay speaker
+PartOf=airplay-bridge.service
+After=airplay-bridge.service
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+EnvironmentFile=%t/airplay-bridge/%i.env
+ExecStart=/usr/lib/airplay-bridge/bin/python -m airplay_bridge.sender --host ${HOST} --title ${TITLE} --fifo %t/airplay-bridge/%i.fifo
+Restart=on-failure
+RestartSec=2
+Slice=session.slice

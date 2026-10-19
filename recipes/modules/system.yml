@@ -41,6 +41,7 @@ modules:
       enabled:
         - vicinae.service
         - deepfilter-mic.service # mic noise suppression
+        - airplay-bridge.service # an output per AirPlay speaker
 
   - type: default-flatpaks
     configurations:

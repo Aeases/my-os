@@ -6,3 +6,6 @@ ColorScheme=Resolve
 
 [kdeglobals][Icons]
 Theme=Papirus-Dark
+
+[plasmarc][Theme]
+name=resolve

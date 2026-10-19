@@ -60,6 +60,8 @@ test "$(systemctl get-default)" = graphical.target
 
 grep -qx 'Enabled=false' /etc/xdg/kwalletrc
 grep -qx 'LookAndFeelPackage=org.aeasesos.resolve.desktop' /etc/xdg/kdeglobals
+grep -qx 'name=resolve' /etc/xdg/plasmarc
+test -f /usr/share/plasma/desktoptheme/resolve/widgets/bar_meter_horizontal.svgz
 fc-list : family | tr ',' '\n' | grep -x 'JetBrainsMonoNL Nerd Font' >/dev/null
 
 test "$(GSETTINGS_BACKEND=memory gsettings get org.gnome.desktop.interface gtk-theme)" = "'adw-gtk3-dark'"
@@ -87,6 +89,7 @@ for unit in "${IMPORTANT_UNITS[@]}"; do
 done
 
 IMPORTANT_USER_UNITS=(
+    airplay-bridge.service
     deepfilter-mic.service
     vicinae.service
 )
@@ -97,6 +100,10 @@ for unit in "${IMPORTANT_USER_UNITS[@]}"; do
         exit 1
     fi
 done
+
+# the venv takes cryptography, requests, cffi... from the image's RPMs
+/usr/lib/airplay-bridge/bin/python -c 'import airplay_bridge.bridge, airplay_bridge.sender'
+command -v avahi-browse pactl >/dev/null
 
 # is-enabled exits 1 for a disabled unit
 if [[ "$(systemctl is-enabled libvirtd.service 2>/dev/null || true)" != disabled ]]; then
