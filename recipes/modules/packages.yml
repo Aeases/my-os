@@ -137,6 +137,7 @@ modules:
         - plasma-discover-flatpak
         - plasma-discover-rpm-ostree 
         - dolphin
+        - kio-admin # allow admin dolphin
         - konsole
         - kate
         - ark

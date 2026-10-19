@@ -42,3 +42,5 @@ jobs:
           maximize_build_space: true
 
           use_cache: true
+
+          build_chunked_oci: true

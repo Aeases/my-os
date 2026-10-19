@@ -22,6 +22,8 @@ modules:
   - from-file: modules/extras.yml
   - from-file: modules/system.yml
 
+  - type: initramfs
+
   - type: signing
 
   - type: script
