@@ -68,6 +68,7 @@ modules:
         - qemu-kvm
         - gvfs-afc # GVFS backends for Nautilus
         - gvfs-fuse
+        - fuse-libs # libfuse2, for AppImages
         - gvfs-goa
         - gvfs-gphoto2
         - gvfs-mtp

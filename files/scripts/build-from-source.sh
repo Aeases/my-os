@@ -62,5 +62,14 @@ dnf -y install --setopt=install_weak_deps=False pam-devel stb_image_resize2-deve
         'pkgconfig(tomlplusplus)' 'pkgconfig(wayland-client)' 'pkgconfig(wayland-egl)' \
         'pkgconfig(wayland-protocols)' 'pkgconfig(wayland-scanner)' 'pkgconfig(wireplumber-0.5)' \
         'pkgconfig(xkbcommon)'
+git init --quiet noctalia
+git -C noctalia fetch --quiet --depth 1 https://github.com/noctalia-dev/noctalia-shell.git \
+        273439338a50c51bdef105ba243175d7a914965a
+git -C noctalia checkout --quiet FETCH_HEAD
+git -C noctalia apply "$PATCHES/noctalia-local.patch"
+meson setup noctalia/build noctalia --prefix=/usr --buildtype=release -Dtests=disabled
+meson compile -C noctalia/build
+DESTDIR="$OUT" meson install -C noctalia/build
+
 cd /
 rm -rf "$WORK"
