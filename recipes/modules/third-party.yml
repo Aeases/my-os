@@ -38,3 +38,15 @@ modules:
     install:
       packages:
         - code
+
+  - type: dnf
+    repos:
+      cleanup: true
+      files:
+        - terra.repo # files/dnf/terra.repo
+    install:
+      packages:
+        - keyd
+        - awww
+        - python3-waypaper
+        - noctalia-nightly
