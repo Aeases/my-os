@@ -1,0 +1,11 @@
+[Unit]
+Description=B550 AORUS PRO AX fan/temp sensors
+ConditionFirmware=smbios-field(board_name = "B550 AORUS PRO AX")
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=modprobe it87
+
+[Install]
+WantedBy=multi-user.target
