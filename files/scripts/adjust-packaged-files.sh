@@ -17,6 +17,9 @@ systemctl set-default graphical.target
 
 systemd-hwdb update
 
+chmod 0440 /etc/sudoers.d/pwfeedback
+visudo -c
+
 [[ $(firewall-offline-cmd --get-default-zone) == FedoraWorkstation ]] \
   || firewall-offline-cmd --set-default-zone=FedoraWorkstation # errors if already set
 

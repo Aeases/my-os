@@ -11,6 +11,7 @@ import time
 SINK_PREFIX = "airplay."
 RUNTIME_DIR = os.path.join(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"), "airplay-bridge")
 RESYNC_SECONDS = 5
+BROWSE_TIMEOUT_SECONDS = 5
 GONE_GRACE_SECONDS = 60
 IDLE_STOP_SECONDS = 15
 
@@ -18,18 +19,23 @@ log = logging.getLogger("airplay-bridge")
 
 
 def unescape(name):
-    # avahi-browse -p escapes as \DDD (decimal)
-    return re.sub(r"\\(\d{3})", lambda m: chr(int(m.group(1))), name)
+    raw = re.sub(rb"\\(\d{3})", lambda m: bytes([int(m.group(1))]), name.encode())
+    return raw.decode(errors="replace")
 
 
 def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "speaker"
 
 
-async def run(*cmd, check=True):
+async def run(*cmd, check=True, timeout=None):
     proc = await asyncio.create_subprocess_exec(*cmd, stdout=asyncio.subprocess.PIPE,
                                                 stderr=asyncio.subprocess.PIPE)
-    out, err = await proc.communicate()
+    try:
+        out, err = await asyncio.wait_for(proc.communicate(), timeout)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        raise
     if check and proc.returncode:
         raise RuntimeError(f"{cmd[0]} {cmd[1]} failed: {err.decode().strip()}")
     return out.decode()
@@ -85,8 +91,12 @@ class Bridge:
         raise RuntimeError("avahi-browse exited")
 
     async def refresh_seen(self):
-        # resolved entries only print once; a one-shot browse refreshes last_seen
-        out = await run("avahi-browse", "-p", "-r", "-k", "-t", "_raop._tcp", check=False)
+        try:
+            out = await run("avahi-browse", "-p", "-r", "-k", "-t", "_raop._tcp",
+                            check=False, timeout=BROWSE_TIMEOUT_SECONDS)
+        except asyncio.TimeoutError:
+            log.warning("avahi-browse did not finish, skipping this refresh")
+            return
         for line in out.splitlines():
             self.on_browse(line)
 
@@ -113,11 +123,11 @@ class Bridge:
         return {s["name"][len(SINK_PREFIX):]: s for s in sinks if s["name"].startswith(SINK_PREFIX)}
 
     async def load_sink(self, speaker):
-        description = speaker.name.replace('"', "'")
+        description = speaker.name.replace('"', "’").replace("'", "’")
         await run("pactl", "load-module", "module-pipe-sink",
                   f"file={self.fifo(speaker.key)}", f"sink_name={SINK_PREFIX}{speaker.key}",
                   "format=s16le", "rate=44100", "channels=2",
-                  f'sink_properties=device.description="{description}" device.icon_name="audio-speakers"')
+                  f"sink_properties=\"device.description='{description}' device.icon_name='audio-speakers'\"")
         log.info("added output for %s", speaker.name)
 
     async def unload_sink(self, key, sink):

@@ -1,0 +1,5 @@
+Defaults pwfeedback
+Defaults env_keep += "EDITOR VISUAL"
+Defaults lecture=never
+Defaults insults
+Defaults !pam_silent
