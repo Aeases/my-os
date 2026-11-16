@@ -15,8 +15,6 @@ modules:
         - uwsm
         - waybar
         - nwg-look
-        - python3-imageio-ffmpeg # waypaper deps not in Fedora
-        - python3-screeninfo
 
   - type: dnf
     repos:
