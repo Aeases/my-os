@@ -41,7 +41,7 @@ echo "discover-overlay==0.7.9 --hash=sha256:d7815ec315b4a69449bb21abd735369caf54
 pip install --root-user-action=ignore --no-deps --require-hashes --root "$OUT" --prefix /usr -r discover.txt
 
 python3 -m venv --without-pip --system-site-packages /usr/lib/airplay-bridge
-pip --python /usr/lib/airplay-bridge/bin/python install --root-user-action=ignore --no-deps --require-hashes \
+pip --python /usr/lib/airplay-bridge/bin/python install --root-user-action=ignore --no-deps \
         --no-cache-dir -r "$AIRPLAY_BRIDGE/requirements.txt"
 AIRPLAY_SITE=$(/usr/lib/airplay-bridge/bin/python -c 'import sysconfig; print(sysconfig.get_path("purelib"))')
 cp -r "$AIRPLAY_BRIDGE/airplay_bridge" "$AIRPLAY_SITE/"

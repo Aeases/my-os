@@ -40,6 +40,7 @@ modules:
         - python3-pulsectl-asyncio
         - python3-pyxdg
         - python3-requests
+        - python3-frozenlist
         - python3-setuptools
         - python3-websocket-client
         - python3-xlib
