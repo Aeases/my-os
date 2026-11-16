@@ -11,12 +11,14 @@ IMPORTANT_PACKAGES=(
     hyprland
     hyprland-uwsm
     kitty
+    kmod-ryzen_smu
     kvantum
     libvirt
     nautilus
     plasma-desktop
     plasma-integration
     qemu-kvm
+    ryzenadj
     steam
     swtpm-tools
     tuigreet

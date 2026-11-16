@@ -5,10 +5,23 @@ modules:
     snippets:
       - dnf config-manager setopt '*-debug.enabled=0' '*-source.enabled=0'
 
+  - type: containerfile
+    snippets:
+      - |
+        RUN --mount=type=cache,dst=/var/cache \
+            --mount=type=cache,dst=/var/log \
+            --mount=type=bind,from=ghcr.io/ublue-os/akmods:ogc-45,src=/kernel-rpms,dst=/tmp/kernel-rpms \
+            --mount=type=bind,from=ghcr.io/ublue-os/akmods:ogc-45,src=/rpms/common,dst=/tmp/rpms/common \
+            --mount=type=bind,from=ghcr.io/ublue-os/akmods:ogc-45,src=/rpms/kmods,dst=/tmp/rpms/kmods \
+            --mount=type=bind,from=ghcr.io/ublue-os/akmods-extra:ogc-45,src=/rpms/extra,dst=/tmp/rpms/extra \
+            --mount=type=bind,from=ghcr.io/ublue-os/akmods-extra:ogc-45,src=/rpms/kmods,dst=/tmp/rpms/kmods-extra \
+            --mount=type=bind,src=files/scripts,dst=/ctx,Z \
+            /ctx/03-install-kernel-akmods.sh
+
   - type: akmods
+    base: ogc
     nvidia-driver: nvidia-open
-    install:
-      - v4l2loopback # virtual camera
+    install: []
 
   - type: script
     snippets:

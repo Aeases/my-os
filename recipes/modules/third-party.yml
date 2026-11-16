@@ -20,6 +20,15 @@ modules:
     repos:
       cleanup: true
       copr:
+        - bazzite-org/bazzite
+    install:
+      packages:
+        - ryzenadj
+
+  - type: dnf
+    repos:
+      cleanup: true
+      copr:
         - quadratech188/vicinae
     install:
       packages:
